@@ -20,9 +20,6 @@ class RatesController extends Controller
     public function get_rates_by_date()
     {
         $GetRates = $this->getRates();
-//        dd($GetRates->__getFunctions());
-
-
         $url = 'ExchangeRatesByDate';
         $params = array(['date' => date('Y-m-d')]);
 
