@@ -19,22 +19,19 @@ class RatesController extends Controller
 
     public function get_rates_by_date()
     {
-        try {
-            $GetRates = $this->getRates();
-            $date = date('Y-m-d');
+        $GetRates = $this->getRates();
+//        dd($GetRates->__getFunctions());
 
-            $url = 'ExchangeRatesByDate';
-            $params = ['date' => $date];
-            dump($params);
 
-            $by_date = $GetRates->__soapCall($url, $params);
-            var_dump($by_date);
-            return $by_date;
+        $url = 'ExchangeRatesByDate';
+        $params = array(['date' => date('Y-m-d')]);
 
-        } catch (\Exception $ex){
-            var_dump($ex);
-        }
+        $by_date = $GetRates->__soapCall($url, $params);
+        dd($by_date->ExchangeRatesByDateResult->Rates->ExchangeRate);
+
+        return $by_date;
     }
+
 
     public function get_rates_by_date_by_iso()
     {
