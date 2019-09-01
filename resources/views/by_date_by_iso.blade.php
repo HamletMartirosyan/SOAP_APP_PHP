@@ -27,8 +27,10 @@
             </span>
 
             <span class="inputs">
-                <input type="submit" value="Convert to" id="get_values" class="btn btn-success" onclick="changeData()">
+                <input type="submit" value="Convert to" id="get_values" class="btn btn-success">
             </span>
+
+            <span class="alert-danger"> {{ $error }}</span>
 
             @if( $converted_value != '')
                 <span id="convert_value" class="result">
@@ -38,8 +40,8 @@
         </form>
     </div>
 
-    <div id="response">
-
+    <div id="table_data">
+         {{--Table from SOAP data--}}
     </div>
 
 @endsection

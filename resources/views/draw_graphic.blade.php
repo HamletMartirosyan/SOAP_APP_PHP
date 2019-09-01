@@ -1,7 +1,7 @@
 @extends('index')
 
 @section('title')
-    draw_graphic
+    Chart drawer
 @endsection
 
 @section('draw_graphic')
@@ -11,19 +11,20 @@
 
             <span class="inputs">
                 <label for="start_date">Start date</label>
-                <input type="date" value="{{ $start_date }}" name="start_date" id="start_date">
+                <input type="date" name="start_date" id="start_date">
             </span>
+
             <span class="inputs">
                 <label for="end_date">End date</label>
-                <input type="date" value="{{ $end_date }}" name="end_date" id="end_date">
+                <input type="date" name="end_date" id="end_date">
             </span>
 
             <span class="inputs">
                 <label for="iso">ISO</label>
                 <select name="iso" id="iso">
-                    @foreach($iso_codes as $val)
-                        <option value="{{ $val }}" @if($val== $iso_code) selected @endif>
-                            {{ $val }}
+                    @foreach($iso_codes as $iso)
+                        <option value="{{ $iso }}">
+                            {{ $iso }}
                         </option>
                     @endforeach
                 </select>
@@ -36,6 +37,5 @@
 
         <!-- GOOGLE CHARTS -->
         <div id="curve_chart"></div>
-
     </div>
 @endsection

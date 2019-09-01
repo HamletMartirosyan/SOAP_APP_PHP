@@ -1,119 +1,155 @@
-// DRAW GOOGLE-CHART DIAGRAM ===========================================================================================
-function drawGoogleChart() {
-    let method = 'GET';
-    let url = '/draw_calendar_graphic/';
-    let dataType = 'json';
-    let data = {
-        'start_date': $('#start_date').val(),
-        'end_date': $('#end_date').val(),
-        'iso': $('#iso').val(),
-    };
-    let success_data = ajaxHandler(method, url, data, dataType);
+// AJAX HANDLER ========================================================================================================
 
-    drawGraphic(success_data);
-}
-
-function drawGraphic(data) {
-    alert('success !!!');
-    console.log(data);
-
-    google.charts.load('current', {'packages': ['corechart']});
-    google.charts.setOnLoadCallback(drawChart);
-}
-
-function drawChart(data) {
-    let iso_code = $('#iso').val();
-    let arr = [];
-    let chart_data = google.visualization.arrayToDataTable([
-        ['Date', 'ISO']
-    ]);
-
-    /*for (let i = 0; i < data.length; i++) {
-        for (let key in data[i]) {
-            alert(key + ' // ' + data[i][key][iso_code]);
-            arr[key] = data[key][iso_code];
-            chart_data.push(arr);
-        }
-    }*/
-
-    let options = {
-        title: 'Company Performance',
-        curveType: 'function',
-        legend: {position: 'bottom'}
-    };
-
-    let chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-    chart.draw(chart_data, options);
-
-    let attr = document.createAttribute('style');
-    attr.value = "width: 900px; height: 500px";
-    document.getElementById('curve_chart').setAttributeNode(attr);
-
-    alert(chart_data);
-
-}
-
-// DRAW GOOGLE-CHART DIAGRAM ===========================================================================================
-
-
-// By_date_by_iso ======================================================================================================
-function getDataFromSoap() {
-    let data = {
-        'date': $("#date").val(),
-    };
-    let method = 'GET';
-    let url = '/by_date/';
-    let dataType = 'json';
-    let success_data = ajaxHandler(method, url, data, dataType);
-
-    printTable(success_data)
-}
-
-function printTable(data) {
-    let response =
-        '<table class="table thead-dark">' +
-        '<tr class="thead-dark">' +
-        '<th scope="col">ISO</th>' +
-        '<th scope="col">Amount</th>' +
-        '<th scope="col">Rate</th>' +
-        '<th scope="col">Difference</th>' +
-        '</tr>';
-    for (let val in data) {
-        response += '<tr>';
-        for (let item in data[val]) {
-            response += '<td>' + data[val][item] + '</td>';
-        }
-        response += '</tr>';
-    }
-    response += '</table>';
-
-    let attr = document.createAttribute('class');
-    attr.value = 'row';
-    document.getElementById('response').setAttributeNode(attr);
-    document.getElementById('response').innerHTML = response;
-}
-
-// By_date_by_iso ======================================================================================================
-
-
-// AJAX ================================================================================================================
-function ajaxHandler(method, url, data, dataType) {
+function ajaxRequest(method, url, data) {
+    let result = NaN;
     $.ajax({
-        method: method,
         url: url,
-        dataType: dataType,
+        method: method,
+        dataType: 'json',
         data: data,
         contentType: 'application/json; charset=utf-8',
-        statusCode: {
-            404: function () {
-                alert("page not found");
-            }
-        },
-        success: function (data) {
-            return data;
+        async: false,
+        success: function (response) {
+            result = response;
         },
         errors: function (e) {
             alert(e);
         }
-    })
+    });
+
+    return result;
 }
+
+// AJAX HANDLER ========================================================================================================
+
+
+// GET DATA FROM SOAP ==================================================================================================
+
+function getDataFromSoap() {
+    let data = {
+        'date': $("#date").val(),
+    };
+    let url = '/by_date';
+    let method = 'GET';
+    let response = ajaxRequest(method, url, data);
+
+    drawTable(response);
+}
+
+function drawTable(data) {
+    let table_data =
+        '<table class="table thead-dark">' +
+        '<tr class="thead-dark">' +
+        '<th>ISO</th>' +
+        '<th>Amount</th>' +
+        '<th>Rate</th>' +
+        '<th>Difference</th>' +
+        '</tr>';
+    for (let rate in data) {
+        table_data += '<tr>';
+        for (let item in data[rate]) {
+            table_data += '<td>' + data[rate][item] + '</td>'
+        }
+        table_data += '</tr>';
+    }
+    table_data += '</table>';
+
+    let attr = document.createAttribute('class');
+    attr.value = 'row';
+    document.getElementById('table_data').setAttributeNode(attr);
+    document.getElementById('table_data').innerHTML = table_data;
+}
+
+// GET DATA FROM SOAP ==================================================================================================
+
+
+// DRAW GOOGLE-CHART DIAGRAM ===========================================================================================
+
+function drawGoogleChart() {
+    let start = $('#start_date').val();
+    let end = $('#end_date').val();
+
+    if (!(start === '') && !(end === '')) {
+        $('#draw').prop("style", "cursor: pointer");
+
+        let method = 'GET';
+        let url = '/draw_graphic_debug';
+        let data = {
+            'start_date': start,
+            'end_date': end,
+            'iso': $('#iso').val(),
+        };
+        let response = ajaxRequest(method, url, data);
+
+        chartDrowerHandler(response);
+    }
+}
+
+function chartDrowerHandler(response) {
+    google.charts.load('current', {packages: ['corechart', 'bar']});
+    google.charts.setOnLoadCallback(
+        function () {
+            let data = Array(['Date', 'Rate', { role: 'style' }]);
+            let style = 'fill-color : #005BED; stroke-color: #2100f8';
+
+            for (let key in response) {
+                let rate = parseFloat(response[key]);
+                data.push([key, rate, style]);
+            }
+            let chartData = google.visualization.arrayToDataTable(data);
+
+
+            let options = {
+                title: 'Rates of days',
+                focusTarget: 'category',
+                hAxis: {
+                    title: '',
+                    textStyle: {
+                        fontSize: 12,
+                        color: '#1800b4',
+                        bold: true,
+                        italic: false
+                    },
+                },
+                vAxis: {
+                    title: 'Rates',
+                    textStyle: {
+                        fontSize: 18,
+                        color: '#060c45',
+                        bold: true,
+                        italic: false
+                    },
+                    titleTextStyle: {
+                        fontSize: 22,
+                        color: '#100327',
+                        bold: true,
+                        italic: true
+                    }
+                }
+            };
+
+            let attr = document.createAttribute('style');
+            attr.value = "width: 100%; height: 450px";
+            document.getElementById('curve_chart').setAttributeNode(attr);
+
+            let chart = new google.visualization.ColumnChart(document.getElementById('curve_chart'));
+            chart.draw(chartData, options);
+        });
+}
+
+// DRAW GOOGLE-CHART DIAGRAM ===========================================================================================
+
+
+
+// button setting ======================================================================================================
+
+$(document).ready(function () {
+    $('#draw').onmouseover(function () {
+        if ($('#start_date').val() && $('#end_date').val())
+            $('#draw').attr("style", "cursor: pointer");
+        else
+            $('#draw').attr("style", "cursor: default");
+    });
+});
+
+// Readonly 'DRAW' button ==============================================================================================

@@ -66,3 +66,6 @@ table {
     border: #174983 solid 2px;
     background-color: #edfffc;
 }
+#get_values{
+    cursor: default;
+}
