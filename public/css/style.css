@@ -70,6 +70,6 @@ table {
 #loading {
     height: 40px;
     display: none;
-    margin: 0 auto;
+    margin-left: 40px;
     position: relative;
 }

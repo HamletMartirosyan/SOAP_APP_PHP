@@ -80,7 +80,7 @@ function drawGoogleChart() {
     if (!(start === '') && !(end === '')) {
 
         let method = 'GET';
-        let url = '/draw_graphic_debug';
+        let url = '/draw_graphic_ajax';
         let data = {
             'start_date': start,
             'end_date': end,
@@ -148,10 +148,14 @@ function chartDrowerHandler(response) {
 
 
 // button setting ======================================================================================================
+// dates validator =====================================================================================================
 
 $(document).ready(function () {
     $('#draw').mouseover(function () {
-        if ($('#start_date').val() !== '' && $('#end_date').val() !== '') {
+        let start = $('#start_date').val();
+        let end = $('#end_date').val();
+
+        if (start !== '' && end !== '') {
             $('#draw').css({'cursor': 'pointer'}).enable();
         }
         else {

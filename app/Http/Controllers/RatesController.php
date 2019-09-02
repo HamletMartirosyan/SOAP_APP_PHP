@@ -127,7 +127,6 @@ class RatesController extends Controller
                 $data = $this->getRates($func, $args);
                 $rates = $data->ExchangeRatesByDateByISOResult->Rates->ExchangeRate;
 
-
                 $rate = $rates->Rate / $rates->Amount;
                 $result[$date] = $rate;
             }
