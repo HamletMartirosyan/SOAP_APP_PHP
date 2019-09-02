@@ -34,12 +34,14 @@
                 <span id="draw" class="btn btn-success" onclick="drawGoogleChart()"> Draw </span>
             </span>
         </form>
+    </div>
 
-        <img src="{{ asset('img/load.gif') }}" alt="Please wait ..." id="loading">
+    <div class="load">
+        <img src="{{ asset('img/loading.gif') }}" alt="Please wait ..." id="loading">
+    </div>
 
-        <div id="curve_chart">
-            <!-- GOOGLE CHARTS DIAGRAM-->
-        </div>
+    <div id="curve_chart">
+        <!-- GOOGLE CHARTS DIAGRAM-->
     </div>
 
 

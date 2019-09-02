@@ -2,8 +2,6 @@
 
 function ajaxRequest(method, url, data) {
     let result = NaN;
-    $("#loading").show();
-
     $.ajax({
         url: url,
         method: method,
@@ -19,7 +17,6 @@ function ajaxRequest(method, url, data) {
             alert(e);
         }
     });
-
 
     return result;
 }
@@ -39,7 +36,6 @@ function getDataFromSoap() {
         let method = 'GET';
 
         let response = ajaxRequest(method, url, data);
-
         drawTable(response);
     }
 }
@@ -76,19 +72,46 @@ function drawTable(data) {
 function drawGoogleChart() {
     let start = $('#start_date').val();
     let end = $('#end_date').val();
+    let iso = $('#iso').val();
+    $('#start_date').css({
+        'color': '#121212',
+        'font-weight': 'normal',
+        'border': 'solid 1px #7a7a7a'});
 
-    if (!(start === '') && !(end === '')) {
+    if ((start !== '') && (end !== '')) {
 
-        let method = 'GET';
-        let url = '/draw_graphic_ajax';
-        let data = {
-            'start_date': start,
-            'end_date': end,
-            'iso': $('#iso').val(),
-        };
-        let response = ajaxRequest(method, url, data);
+        let s = new Date(start).getTime();
+        let e = new Date(end).getTime();
 
-        chartDrowerHandler(response);
+        let diff = e - s;
+
+        if (diff > 24 * 60 * 60) {
+            let draw = $("#draw");
+            let loading = $("#loading");
+
+            loading.show();
+            draw.attr("disabled", true).css("background", '#666');
+
+            let method = 'GET';
+            let url = '/draw_graphic_ajax';
+            let data = {
+                'start_date': start,
+                'end_date': end,
+                'iso': iso,
+            };
+
+            let response = ajaxRequest(method, url, data);
+            $('.load').css('height', 0);
+            loading.hide();
+            chartDrowerHandler(response);
+            draw.attr("disabled", false).css("background", '#28a745');
+        }
+        else {
+            $('#start_date').css({
+                'color': 'red',
+                'font-weight': 'bold',
+                'border': 'solid 2px red'});
+        }
     }
 }
 
@@ -136,10 +159,11 @@ function chartDrowerHandler(response) {
             };
 
             let attr = document.createAttribute('style');
-            attr.value = "width: 100%; height: 450px";
+            attr.value = "display: block; width: 100%; height: 450px";
             document.getElementById('curve_chart').setAttributeNode(attr);
 
-            let chart = new google.visualization.ColumnChart(document.getElementById('curve_chart'));
+            let chart_id = document.getElementById('curve_chart');
+            let chart = new google.visualization.ColumnChart(chart_id);
             chart.draw(chartData, options);
         });
 }
