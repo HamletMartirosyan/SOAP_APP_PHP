@@ -2,6 +2,8 @@
 
 function ajaxRequest(method, url, data) {
     let result = NaN;
+    $("#loading").show();
+
     $.ajax({
         url: url,
         method: method,
@@ -10,12 +12,14 @@ function ajaxRequest(method, url, data) {
         contentType: 'application/json; charset=utf-8',
         async: false,
         success: function (response) {
+            $("#loading").hide();
             result = response;
         },
         errors: function (e) {
             alert(e);
         }
     });
+
 
     return result;
 }
@@ -26,14 +30,18 @@ function ajaxRequest(method, url, data) {
 // GET DATA FROM SOAP ==================================================================================================
 
 function getDataFromSoap() {
-    let data = {
-        'date': $("#date").val(),
-    };
-    let url = '/by_date';
-    let method = 'GET';
-    let response = ajaxRequest(method, url, data);
+    let date = $("#date").val();
+    if (date !== '') {
+        let data = {
+            'date': date,
+        };
+        let url = '/by_date';
+        let method = 'GET';
 
-    drawTable(response);
+        let response = ajaxRequest(method, url, data);
+
+        drawTable(response);
+    }
 }
 
 function drawTable(data) {
@@ -70,7 +78,6 @@ function drawGoogleChart() {
     let end = $('#end_date').val();
 
     if (!(start === '') && !(end === '')) {
-        $('#draw').prop("style", "cursor: pointer");
 
         let method = 'GET';
         let url = '/draw_graphic_debug';
@@ -89,7 +96,7 @@ function chartDrowerHandler(response) {
     google.charts.load('current', {packages: ['corechart', 'bar']});
     google.charts.setOnLoadCallback(
         function () {
-            let data = Array(['Date', 'Rate', { role: 'style' }]);
+            let data = Array(['Date', 'Rate', {role: 'style'}]);
             let style = 'fill-color : #005BED; stroke-color: #2100f8';
 
             for (let key in response) {
@@ -140,16 +147,16 @@ function chartDrowerHandler(response) {
 // DRAW GOOGLE-CHART DIAGRAM ===========================================================================================
 
 
-
 // button setting ======================================================================================================
 
 $(document).ready(function () {
-    $('#draw').onmouseover(function () {
-        if ($('#start_date').val() && $('#end_date').val())
-            $('#draw').attr("style", "cursor: pointer");
-        else
-            $('#draw').attr("style", "cursor: default");
+    $('#draw').mouseover(function () {
+        if ($('#start_date').val() !== '' && $('#end_date').val() !== '') {
+            $('#draw').css({'cursor': 'pointer'}).enable();
+        }
+        else {
+            $('#draw').css('cursor', 'not-allowed').disable();
+        }
     });
 });
-
 // Readonly 'DRAW' button ==============================================================================================

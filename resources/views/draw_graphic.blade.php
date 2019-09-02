@@ -35,7 +35,12 @@
             </span>
         </form>
 
-        <!-- GOOGLE CHARTS -->
-        <div id="curve_chart"></div>
+        <img src="{{ asset('img/load.gif') }}" alt="Please wait ..." id="loading">
+
+        <div id="curve_chart">
+            <!-- GOOGLE CHARTS DIAGRAM-->
+        </div>
     </div>
+
+
 @endsection

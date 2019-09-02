@@ -66,6 +66,10 @@ table {
     border: #174983 solid 2px;
     background-color: #edfffc;
 }
-#get_values{
-    cursor: default;
+
+#loading {
+    height: 40px;
+    display: none;
+    margin: 0 auto;
+    position: relative;
 }

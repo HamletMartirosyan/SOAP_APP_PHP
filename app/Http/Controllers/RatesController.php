@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use DatePeriod;
-use DateTime;
 use Illuminate\Http\Request;
-use DateInterval;
 use SoapClient;
+
 
 class RatesController extends Controller
 {
@@ -23,7 +21,7 @@ class RatesController extends Controller
         return $result;
     }
 
-    public function get_rates_by_date_by_iso()
+    public function get_rates_by_date_by_iso(Request $request)
     {
         $iso = '';
         $count = '';
@@ -32,10 +30,16 @@ class RatesController extends Controller
         $iso_codes = $this->get_iso_codes();
         $error = '';
 
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $iso = $_POST['iso'];
-            $date = $_POST['date'];
-            $count = $_POST['count'];
+        if ($request->isMethod('post')) {
+            $iso = $request->input('iso');
+            $date = $request->input('date');
+            $count = $request->input('count');
+
+            $request->validate([
+                'date' => 'required|date',
+                'count' => 'required|numeric',
+                'iso' => 'required',
+            ]);
 
             if ($iso != '' && $date != '' && $count != '') {
                 $func = 'ExchangeRatesByDateByISO';
@@ -43,25 +47,12 @@ class RatesController extends Controller
 
                 $data = $this->getRates($func, $args);
                 $result = $data->ExchangeRatesByDateByISOResult->Rates->ExchangeRate;
+
                 $rate = $result->Rate;
                 $amount = $result->Amount;
 
-                $pattern = '/^([0-9]+)([\.]{0,1})([0-9]+)$/';
-                $count = str_replace(',', '.', strval($count));
-
-                if (preg_match($pattern, $count))
-                    $converted_value = $this->convert_rate($count, $rate, $amount);
-                else
-                    $error = 'The value is not correct';
+                $converted_value = $this->convert_rate($count, $rate, $amount);
             }
-            else {
-                if($date == '')
-                    $error = 'The date is empty';
-                if ($count == '')
-                    $error = 'The value is empty';
-
-            }
-
         }
 
         $context = [
@@ -69,17 +60,21 @@ class RatesController extends Controller
             'date' => $date,
             'count' => $count,
             'iso_codes' => $iso_codes,
-            'error' => $error,
             'converted_value' => $converted_value,
+            'error' => $error,
         ];
 
         return view('by_date_by_iso', $context);
     }
 
-    public function get_rates_by_date()
+    public function get_rates_by_date(Request $request)
     {
+        $request->validate([
+            'date' => 'required|date'
+        ]);
+
         $func = 'ExchangeRatesByDate';
-        $args = array(['date' => $_GET['date']]);
+        $args = array(['date' => $request->input('date')]);
 
         $data = $this->getRates($func, $args);
         $rates = $data->ExchangeRatesByDateResult->Rates->ExchangeRate;
@@ -103,12 +98,18 @@ class RatesController extends Controller
     }
 
 
-    public function get_data_for_chart()
+    public function get_data_for_chart(Request $request)
     {
-        $start_date = strtotime($_GET['start_date']);
-        $end_date = strtotime($_GET['end_date']);
-        $iso = $_GET['iso'];
-        $result = "Start date or end date is not defined";
+        $start_date = strtotime($request->input('start_date'));
+        $end_date = strtotime($request->input('end_date'));
+        $iso = $request->input('iso');
+        $result = '';
+
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'iso' => 'required',
+        ]);
 
         if (isset($start_date) and isset($end_date)) {
             $dates = [];
@@ -128,35 +129,14 @@ class RatesController extends Controller
 
 
                 $rate = $rates->Rate / $rates->Amount;
-                $diff = $rates->Difference;
                 $result[$date] = $rate;
-
-                /*$result[$date] = [
-                    'ISO' => $rates->ISO,
-                    'Amount' => $rates->Amount,
-                    'Rate' => $rates->Rate,
-                    'Difference' => $rates->Difference,
-                ];*/
             }
         }
         return $result;
     }
 
 
-    public
-    function get_rates_latest()
-    {
-
-    }
-
-    public
-    function get_rates_latest_by_iso()
-    {
-
-    }
-
-    public
-    function get_iso_codes()
+    public function get_iso_codes()
     {
         $func = 'ISOCodes';
         $args = array([]);
@@ -167,8 +147,7 @@ class RatesController extends Controller
         return $result;
     }
 
-    protected
-    function convert_rate($count, $rate, $amount)
+    protected function convert_rate($count, $rate, $amount)
     {
         if ($amount != 0)
             return $count * $rate / $amount;
@@ -177,8 +156,7 @@ class RatesController extends Controller
     }
 
 
-    public
-    function index()
+    public function index()
     {
         return view('index');
     }

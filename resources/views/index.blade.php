@@ -28,6 +28,19 @@
     </div>
     @yield('by_date_by_iso')
     @yield('draw_graphic')
+
+
+     {{--ERROR REPORTING--}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
 </div>
 
 
