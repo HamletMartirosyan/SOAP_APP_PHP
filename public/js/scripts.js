@@ -103,6 +103,7 @@ function drawGoogleChart() {
             let response = ajaxRequest(method, url, data);
             $('.load').css('height', 0);
             loading.hide();
+
             chartDrowerHandler(response);
             draw.attr("disabled", false).css("background", '#28a745');
         }
@@ -187,4 +188,5 @@ $(document).ready(function () {
         }
     });
 });
+
 // Readonly 'DRAW' button ==============================================================================================

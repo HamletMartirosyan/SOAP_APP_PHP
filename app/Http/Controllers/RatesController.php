@@ -3,24 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use SoapClient;
+use App\Rates;
 
 
 class RatesController extends Controller
 {
-    private function getRates($func, $args)
-    {
-        $wsdl = 'http://api.cba.am/exchangerates.asmx?wsdl';
-        $params = array(
-            'encoding' => 'UTF-8',
-            'soap_version' => 'SOAP_1_2',
-            'trace' => true);
-        $client = new SoapClient($wsdl, $params);
-        $result = $client->__soapCall($func, $args);
-
-        return $result;
-    }
-
     public function get_rates_by_date_by_iso(Request $request)
     {
         $iso = '';
@@ -45,7 +32,7 @@ class RatesController extends Controller
                 $func = 'ExchangeRatesByDateByISO';
                 $args = array(['date' => $date, 'ISO' => $iso]);
 
-                $data = $this->getRates($func, $args);
+                $data = Rates::getRates($func, $args);
                 $result = $data->ExchangeRatesByDateByISOResult->Rates->ExchangeRate;
 
                 $rate = $result->Rate;
@@ -76,7 +63,7 @@ class RatesController extends Controller
         $func = 'ExchangeRatesByDate';
         $args = array(['date' => $request->input('date')]);
 
-        $data = $this->getRates($func, $args);
+        $data = Rates::getRates($func, $args);
         $rates = $data->ExchangeRatesByDateResult->Rates->ExchangeRate;
 
         $result = array();
@@ -122,9 +109,9 @@ class RatesController extends Controller
             foreach ($dates as $date) {
                 $args = array([
                     'date' => $date,
-                    'ISO' => $iso
+                    'ISO' => $iso,
                 ]);
-                $data = $this->getRates($func, $args);
+                $data = Rates::getRates($func, $args);
                 $rates = $data->ExchangeRatesByDateByISOResult->Rates->ExchangeRate;
 
                 $rate = $rates->Rate / $rates->Amount;
@@ -140,7 +127,7 @@ class RatesController extends Controller
         $func = 'ISOCodes';
         $args = array([]);
 
-        $data = $this->getRates($func, $args);
+        $data = Rates::getRates($func, $args);
         $result = $data->ISOCodesResult->string;
 
         return $result;
